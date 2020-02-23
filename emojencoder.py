@@ -21,17 +21,8 @@ def convertImage(knn, emojis, image):
     return '\n'.join(['\u2009'.join(line) for line in result])
 
 
-def get_knn(colors):
-    knn = KNeighborsClassifier(n_neighbors=1)
-    knn.fit(X=colors, y=np.arange(len(colors)))
-    return knn
-
-
-def runConversion(webcam=1, video=0, toFile=0, downscale=20,
-                  dictFile='emojiGamutPartitioned.json',
-                  srcFile="default.png", outfile="emojiRender.txt"):
-    '''Parses options for emoji conversion.'''
-    with open(dictFile) as json_file:
+def read_emoji_file(path='emojiGamutPartitioned.json'):
+    with open(path) as json_file:
         emojiDict = json.load(json_file)
 
     colors, emojis = [], []
@@ -40,9 +31,21 @@ def runConversion(webcam=1, video=0, toFile=0, downscale=20,
             colors.append(np.array(color))
             emojis.append(emoji)
 
-    valid_colors = np.array(colors)
-    emojis = np.array(emojis)
-    knn = get_knn(valid_colors)
+    return [np.array(x) for x in (colors, emojis)]
+
+
+def downscale_image(img: Image.Image, coeff) -> np.ndarray:
+    size = np.array(img.size)
+    new_size = np.round(size / coeff).astype(int)
+    return np.array(img.resize(new_size))
+
+
+def runConversion(webcam=1, video=0, toFile=0, downscale=20,
+                  srcFile="default.png", outfile="emojiRender.txt"):
+    colors, emojis = read_emoji_file()
+    knn = KNeighborsClassifier(n_neighbors=1)
+    knn.fit(X=colors, y=np.arange(len(colors)))
+
     if webcam:
         vs = VideoStream
         vs(src=0).start()
@@ -51,7 +54,8 @@ def runConversion(webcam=1, video=0, toFile=0, downscale=20,
             try:
                 while True:
                     timex = time.time()
-                    image = vs(src=0).read().astype(int)[::downscale, ::downscale]
+                    image = Image.fromarray(vs(src=0).read().astype('uint8'))
+                    image = downscale_image(image, downscale)
                     print(convertImage(knn, emojis, image))
                     timeCount += [time.time() - timex]
                     print(sum(timeCount) / len(timeCount))
@@ -66,7 +70,7 @@ def runConversion(webcam=1, video=0, toFile=0, downscale=20,
                 print(image)
         vs(src=0).stop()
     else:
-        image = np.array(Image.open(srcFile))[::downscale, ::downscale][:, :, ::-1]
+        image = downscale_image(Image.open(srcFile), downscale)
         image = convertImage(knn, emojis, image)
         if toFile:
             writeFile(image, outfile)
