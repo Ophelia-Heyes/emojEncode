@@ -22,9 +22,6 @@ The main function, **runConversion**, takes input from either an image file or a
   ### downscale
   This is the integer with which to divide the source resolution. Set to 1 to output at the original image resolution. It's recomended to keep this number higher, especially when rendering video, as the conversion takes a lot of processing time. Defaults to **20**
 
-  ### dictFile
-  This defines the source dictionary json file for the emoji color values. It defaults to the file **"emojiGamutPartitioned.json"**, which is a list of dictionaries seperated by average color value. Unless you intend to reorganize the data structure, keep this at it's default.
-
   ### srcFile
   The source image filename to be converted, if not using the webcam feature. It will accept any three channel RGB image.
 
