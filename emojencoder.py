@@ -37,7 +37,7 @@ def read_emoji_file(path='emojiGamutPartitioned.json'):
 def downscale_image(img: Image.Image, coeff) -> np.ndarray:
     size = np.array(img.size)
     new_size = np.round(size / coeff).astype(int)
-    return np.array(img.resize(new_size))
+    return np.array(img.resize(new_size, Image.BILINEAR))
 
 
 def runConversion(webcam=1, video=0, toFile=0, downscale=20,
