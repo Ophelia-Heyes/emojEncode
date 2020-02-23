@@ -2,6 +2,8 @@
 
 This script takes a variety of image inputs and outputs and emoji representation.
 
+To use, import **emojencoder.py** and use the function **emojencoder.runConversion()**
+
 ## runConversion
 
 The main function, **runConversion**, takes input from either an image file or a webcam feed. Currently, it can only accept video from the webcam, not from video files.
